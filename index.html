@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberInvest // Simulador Quantum</title>
+    <style>
+        /* Importação da fonte estilo datilografia moderna */
+        @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap');
+
+        :root {
+            --bg-color: #030008;
+            --primary-purple: #8b5cf6;
+            --neon-green: #10b981;
+            --neon-purple-glow: rgba(139, 92, 246, 0.3);
+            --neon-green-glow: rgba(16, 185, 129, 0.3);
+            --glass-bg: rgba(15, 10, 25, 0.45);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Courier Prime', monospace;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(at 10% 20%, rgba(139, 92, 246, 0.15) 0px, transparent 50%),
+                radial-gradient(at 90% 80%, rgba(16, 185, 129, 0.1) 0px, transparent 50%);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            width: 100%;
+            max-width: 1100px;
+        }
+
+        header h1 {
+            font-size: 2.2rem;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            text-shadow: 0 0 10px var(--neon-purple-glow);
+            margin-bottom: 8px;
+        }
+
+        header h1 span {
+            color: var(--neon-green);
+            text-shadow: 0 0 10px var(--neon-green-glow);
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            letter-spacing: 1px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1100px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        @media (max-width: 850px) {
+            .container { grid-template-columns: 1fr; }
+        }
+
+        /* Efeito Glassmorphism com bordas simulando circuitos/neon */
+        .panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            position: relative;
+        }
+
+        .panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-purple), var(--neon-green));
+        }
+
+        h2 {
+            font-size: 1.3rem;
+            text-transform: uppercase;
+            margin-bottom: 25px;
+            letter-spacing: 2px;
+            color: var(--primary-purple);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+        }
+
+        .input-wrapper { position: relative; }
+
+        .input-wrapper span {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary-purple);
+            font-weight: bold;
+        }
+
+        input, select {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid var(--glass-border);
+            padding: 12px 12px 12px 30px;
+            color: #fff;
+            font-size: 1rem;
+            border-radius: 6px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--neon-green);
+            box-shadow: 0 0 8px var(--neon-green-glow);
+        }
+
+        select { padding-left: 12px; cursor: pointer; }
+
+        button {
+            width: 100%;
+            background: transparent;
+            border: 1px solid var(--neon-green);
+            color: var(--neon-green);
+            padding: 14px;
+            font-size: 1rem;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 2px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background: var(--neon-green);
+            color: #000;
+            box-shadow: 0 0 15px var(--neon-green-glow);
+        }
+
+        /* Resultados */
+        .results-box {
+            margin-top: 25px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 6px;
+            padding: 20px;
+            border-left: 3px solid var(--neon-green);
+            display: none;
+        }
+
+        .result-line {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 0.95rem;
+        }
+
+        .result-line:last-child {
+            margin-bottom: 0;
+            padding-top: 10px;
+            border-top: 1px dashed rgba(255, 255, 255, 0.1);
+        }
+
+        .result-val { color: var(--neon-green); font-weight: bold; }
+
+        /* Estratégias */
+        .crypto-card {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--glass-border);
+            border-radius: 6px;
+            padding: 18px;
+            margin-bottom: 20px;
+        }
+
+        .crypto-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .crypto-name { font-weight: bold; font-size: 1.1rem; text-transform: uppercase; }
+        .btc-color { color: #f59e0b; }
+        .ada-color { color: #3b82f6; }
+
+        .crypto-badge {
+            font-size: 0.75rem;
+            background: rgba(139, 92, 246, 0.2);
+            color: var(--primary-purple);
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(139, 92, 246, 0.4);
+        }
+
+        .crypto-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+            margin-bottom: 12px;
+        }
+
+        .strategy-tip {
+            font-size: 0.85rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 10px;
+        }
+
+        .strategy-tip span { color: var(--neon-green); }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>// QUANTUM<span>.INVEST</span></h1>
+        <p>SISTEMA DE PROJEÇÃO DE ATIVOS & ALOCAÇÃO DIGITAL</p>
+    </header>
+
+    <div class="container">
+        
+        <div class="panel">
+            <h2>[01] SIMULADOR DE METAS</h2>
+            
+            <div class="form-group">
+                <label>Aporte Inicial</label>
+                <div class="input-wrapper">
+                    <span>$</span>
+                    <input type="number" id="initialAmount" value="1000">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Aporte Mensal Recorrente</label>
+                <div class="input-wrapper">
+                    <span>$</span>
+                    <input type="number" id="monthlyAmount" value="200">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Meta Financeira (Objetivo)</label>
+                <div class="input-wrapper">
+                    <span>$</span>
+                    <input type="number" id="targetAmount" value="50000">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Taxa de Rendimento Estimada</label>
+                <select id="expectedReturn">
+                    <option value="0.08">Conservador (8% a.a. / Renda Fixa)</option>
+                    <option value="0.15">Moderado (15% a.a. / FIIs ou Ações)</option>
+                    <option value="0.35" selected>Cripto Dinâmico (35% a.a. / Portfólio Digital)</option>
+                    <option value="0.60">Alto Risco (60% a.a. / Alocação Agressiva)</option>
+                </select>
+            </div>
+
+            <button onclick="calculateProjection()">Executar Projeção Quântica</button>
+
+            <div class="results-box" id="resultsBox">
+                <div class="result-line">
+                    <span>Tempo Estimado:</span>
+                    <span class="result-val" id="resTime">-</span>
+                </div>
+                <div class="result-line">
+                    <span>Total de Aportes:</span>
+                    <span class="result-val" id="resInvested">-</span>
+                </div>
+                <div class="result-line">
+                    <span>Rendimento em Juros:</span>
+                    <span class="result-val" id="resInterest">-</span>
+                </div>
+                <div class="result-line">
+                    <span>Montante Final:</span>
+                    <span class="result-val" id="resTotal" style="color: #fff;">-</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h2>[02] DIRETRIZES DE ATIVOS DIGITAIS</h2>
+            
+            <div class="crypto-card">
+                <div class="crypto-header">
+                    <span class="crypto-name btc-color">Bitcoin (BTC)</span>
+                    <span class="crypto-badge">Reserva de Valor</span>
+                </div>
+                <p class="crypto-desc">
+                    Ativo estrutural e base do ecossistema cripto. Devido à sua escassez programática estrita limitada a 21 milhões de unidades, atua como proteção macroeconômica contra a inflação das moedas estatais.
+                </p>
+                <div class="strategy-tip">
+                    <span>Abordagem Técnica:</span> Implementação de DCA (Dollar Cost Averaging). Execução de compras fracionadas automatizadas (semanais ou mensais) para mitigar os efeitos da volatilidade e construir preço médio otimizado.
+                </div>
+            </div>
+
+            <div class="crypto-card">
+                <div class="crypto-header">
+                    <span class="crypto-name ada-color">Cardano (ADA)</span>
+                    <span class="crypto-badge">Smart Contracts</span>
+                </div>
+                <p class="crypto-desc">
+                    Blockchain de terceira geração fundamentada em pesquisas científicas revisadas por pares. Foco em alta escalabilidade, segurança e governança on-chain para suporte a contratos inteligentes estáveis.
+                </p>
+                <div class="strategy-tip">
+                    <span>Abordagem Técnica:</span> Staking Nativo Permanente. Delegar os ativos custodiados diretamente para pools de validação seguras. Isso gera um rendimento passivo previsível (média de 3% a 4% a.a.) pago no próprio ativo, potencializando os juros compostos matemáticos.
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function calculateProjection() {
+            const initial = parseFloat(document.getElementById('initialAmount').value) || 0;
+            const monthly = parseFloat(document.getElementById('monthlyAmount').value) || 0;
+            const target = parseFloat(document.getElementById('targetAmount').value) || 0;
+            const annualRate = parseFloat(document.getElementById('expectedReturn').value) || 0;
+            
+            if (target <= initial) {
+                alert("A meta financeira deve ser maior que o aporte inicial de capital.");
+                return;
+            }
+
+            // Cálculo da taxa mensal composta
+            const monthlyRate = Math.pow(1 + annualRate, 1/12) - 1;
+            
+            let currentBalance = initial;
+            let totalInvested = initial;
+            let months = 0;
+            const maxMonths = 600; // Limitador de segurança para 50 anos
+
+            while (currentBalance < target && months < maxMonths) {
+                months++;
+                const interest = currentBalance * monthlyRate;
+                currentBalance += interest + monthly;
+                totalInvested += monthly;
+            }
+
+            const totalInterest = currentBalance - totalInvested;
+
+            let timeText = "";
+            if (months >= 12) {
+                const years = Math.floor(months / 12);
+                const remainingMonths = months % 12;
+                timeText = `${years} ano(s) e ${remainingMonths} mês(es)`;
+            } else {
+                timeText = `${months} mês(es)`;
+            }
+
+            if (months >= maxMonths) { timeText = "Excede 50 anos (Eleve os aportes)"; }
+
+            // Atualização do DOM com os dados calculados
+            document.getElementById('resTime').innerText = timeText;
+            document.getElementById('resInvested').innerText = '$ ' + totalInvested.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            document.getElementById('resInterest').innerText = '$ ' + totalInterest.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            document.getElementById('resTotal').innerText = '$ ' + currentBalance.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            
+            document.getElementById('resultsBox').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
