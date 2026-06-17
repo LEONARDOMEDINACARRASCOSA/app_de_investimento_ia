@@ -1,0 +1,1 @@
+# app_de_investimento_ia
